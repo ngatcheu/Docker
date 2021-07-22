@@ -1,0 +1,161 @@
+Let’s build that image
+$ docker build -t kserge2001/web-serge .
+
+Now, run the container with that image
+$docker run -d -p 88:80 kserge/web-serge
+
+You can access it from your browser 192.168.1.96:88 with 
+$ifconfig
+
+Let’s push that image on the docker hub:
+docker push kserge2001/web-serge
+-----------------------------------------------------------------------------------
+1-Install Apache
+Use the following command to install Apache: # yum install httpd
+
+Now enable the httpd daemon with:
+# chkconfig httpd on (For CentOS 6)
+# systemctl enable httpd
+(For CentOS 7)
+
+At this stage, if you are on CentOS 7 then you need to open the port for
+httpd
+# firewall-cmd --permanent --add-port=80/tcp
+
+Start the httpd daemon with:
+# service httpd start
+# systemctl start httpd (for CentOS 7)
+
+to access this on a browser, we need to check the IP address of our
+Host machine. To do that:
+a. Open a new terminal (a new tab if you are in MobaXterm)
+b. Run the ifconfig command and take the IP address in enp0s3
+c. Now paste the address of your host in the browser, followed by
+the port number. Mine is 192.168.1.141:81
+
+-------------------------------------------------------------------------------------
+2-Install MySQL
+The database software
+
+The command we use is:
+# yum install mysql-server -y
+# yum install mariadb -y (For CentOS 7)
+
+Start the mysql service with:
+# service mysqld start
+# systemctl start mariadb (for CentOS 7)
+
+
+Now enable it with:
+ # chkconfig mysqld on
+ # systemctl enable mariadb
+(For CentOS 7)
+
+Let’s set the root password for mysql
+# mysql_secure_installation 
+(same for
+CentOS 7)
+ 
+Now, login to mysql to create a database to
+store informations for our website
+# mysql -u root -p (same for CentOS 7)
+
+Let’s display all the databases in there:
+mysql> show databases;
+
+Still in the mysql prompt, let’s create our database:
+mysql> create database webserver;                (webserver here is the db name)
+mysql> show databases;
+
+Let’s create a user that an access the database with its password
+mysql> create user oracle@localhost identified by ‘school1’;
+
+Give the user oracle access to the database webserver
+mysql> grant all privileges on webserver.* to oracle@localhost identified
+by ‘school1’;
+
+Let’s load the privileges: mysql> flush privileges;
+
+--------------------------------------------------------------------------------
+4-Install Php
+The Web development Software
+
+To install Php, we use:
+# yum install php php-mysql -y
+(same on CentOS 7)
+
+We need to test if php is
+successfully installed and running
+
+fine. To do that:
+Create a file called info.php in the
+directory /var/www/html
+# cd /var/www/html
+# vim info.php
+
+Let’s restart Apache:
+# service httpd restart
+# systemctl httpd restart (for CentOS 7)
+
+Let’s access it in the browser:
+∙ In the browser, enter the IP address of your host to verify the
+Apache page.
+
+Then add info.php at the end (/IPaddress:portnumber/info.php) to
+check the php page
+∙ Ex: 192.168.1.28:81/info.php
+∙ If you see the following page, then all is working successfully!
+
+
+Let’s install some
+additional packages for
+Php: php-gd
+# yum install php-gd
+(yes to confirm)
+
+
+-------------------------------------------------------------------------
+Step 5.
+Install Wordpress
+The CMS : Content Management System
+
+To install Wordpress, we need to download the compressed file and
+extract it
+# cd /tmp
+# wget http://wordpress.org/wordpress-5.1.1.tar.gz
+Note: If wget command is not found, install it: yum install wget
+⬡ Now, let’s extract the file
+# tar -xzvf wordpress-5.1.1.tar.gz
+# ls
+
+You can remove the tar.gz file now: rm -rf wordpress-5.1.1.tar.gz
+⬡ Copy wordpress content to /var/www/html folder
+# cp -r wordpress/* /var/www/html/
+⬡ Make sure the command worked fine
+# cd /var/www/html/
+# ll
+
+
+Now create a directory called wp-content/uploads in /var/www/html
+# mkdir /var/www/html/wp-content/uploads
+
+Now, copy the content of wp-config-sample.php to the file
+wp-config.php
+# cp wp-config-sample.php wp-config.php
+# ls
+
+
+For ls to display the last item created at the end of the list, yo can use
+ls -ltr
+⬡ Let’s modify that file to set up the mysql connection with the
+webserver database and the user oracle
+# vim wp-config.php
+
+Now, we need to change the ownership on /var/www/html
+# chown -R apache:apache /var/www/html/*
+
+-R means recursive (set the same ownership on all the subdirectories
+and files under a folder)
+⬡ Restart the httpd service # service httpd restart
+⬡ Open the browser and let’s install Wordpress
+⬡ To do that, enter your IP address:portNumber in the browser
